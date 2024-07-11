@@ -1,0 +1,9 @@
+spring:
+  application.name: demo-service
+
+  data.mongodb:
+    host: localhost
+    port: 27017
+    database: demo
+    username: demo_application
+    password: demo_password
