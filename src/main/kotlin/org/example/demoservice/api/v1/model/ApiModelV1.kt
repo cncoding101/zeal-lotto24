@@ -1,6 +1,8 @@
 package org.example.demoservice.api.v1.model
 
+import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
 import org.example.demoservice.customer.Address
 import org.example.demoservice.customer.Customer
 import org.springframework.data.domain.Page

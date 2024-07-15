@@ -16,7 +16,11 @@ class CustomerService @Autowired constructor(
     private val customerNumberProvider: CustomerNumberProvider,
     private val sequenceGenerator: SequenceGeneratorService
 ) {
-    val tenantIdRegex = "^[a-zA-Z0-9_-]+$".toRegex()
+
+    companion object {
+        val TENANT_ID_REGEX = Regex("^[a-zA-Z0-9_-]+$")
+        val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")
+    }
 
     fun registerCustomer(
         tenantId: String,
@@ -26,12 +30,11 @@ class CustomerService @Autowired constructor(
         phoneNumber: String?,
         address: Address?
     ): Customer {
-        if (!tenantId.matches(tenantIdRegex)) {
+        if (!tenantId.matches(TENANT_ID_REGEX)) {
             throw IllegalArgumentException("Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed.")
         }
 
-        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
-        if (!email.matches(emailRegex)) {
+        if (!email.matches(EMAIL_REGEX)) {
             throw IllegalArgumentException("Invalid email format")
         }
 
@@ -55,19 +58,18 @@ class CustomerService @Autowired constructor(
         }
     }
 
-    fun getCustomers(tenantId: String, pageNumber: Int, pageSize: Int): Page<Customer> {
-        if (!tenantId.matches(tenantIdRegex)) {
+    fun getCustomers(tenantId: String, pageable: Pageable): Page<Customer> {
+        if (!tenantId.matches(TENANT_ID_REGEX)) {
             throw IllegalArgumentException("Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed.")
         }
 
-        val pageable: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by("customerNumber").ascending())
         val test = customerRepository.findAllByTenantId(tenantId, pageable);
         return test;
     }
 
     @Cacheable(value = ["customers"], key = "#tenantId + '_' + #customerNumber")
     fun getCustomer(tenantId: String, customerNumber: String): Customer {
-        if (!tenantId.matches(tenantIdRegex)) {
+        if (!tenantId.matches(TENANT_ID_REGEX)) {
             throw IllegalArgumentException("Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed.")
         }
 

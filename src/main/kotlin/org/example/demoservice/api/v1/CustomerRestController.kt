@@ -8,11 +8,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.example.demoservice.api.v1.model.ApiCustomer
-import org.example.demoservice.api.v1.model.ApiCustomerList
-import org.example.demoservice.api.v1.model.RegistrationRequest
-import org.example.demoservice.api.v1.model.toApi
+import org.example.demoservice.api.v1.model.*
+import org.example.demoservice.customer.CustomerNotFoundException
+import org.example.demoservice.customer.CustomerRegistrationException
 import org.example.demoservice.customer.CustomerService
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -70,12 +71,11 @@ class CustomerRestController(
     @GetMapping("/{tenantId}")
     fun getCustomers(
         @PathVariable tenantId: String,
-        @RequestParam(defaultValue = "0", name = "pageNumber") pageNumber: Int,
-        @RequestParam(defaultValue = "10", name = "pageSize") pageSize: Int
+        @PageableDefault(page = 0, size = 10) pageable: Pageable
     ): ResponseEntity<ApiCustomerList> {
         logger.info("Fetching a list of customer for tenant $tenantId")
         return ResponseEntity.status(HttpStatus.OK)
-            .body(customerService.getCustomers(tenantId, pageNumber, pageSize).toApi())
+            .body(customerService.getCustomers(tenantId, pageable).toApi())
     }
 
     @Operation(summary = "get a specific customer of a tenant")
@@ -92,5 +92,29 @@ class CustomerRestController(
         logger.info("Fetching customer with customer id $customerNumber for tenant $tenantId")
         return ResponseEntity.status(HttpStatus.OK)
             .body(customerService.getCustomer(tenantId, customerNumber).toApi())
+    }
+
+    @ExceptionHandler(CustomerRegistrationException::class)
+    fun handleCustomerRegistrationException(ex: CustomerRegistrationException): ResponseEntity<ErrorMessage> {
+        logger.error("CustomerRegistrationException observed: ${ex.message}", ex)
+
+        val errorMessage = ErrorMessage(
+            HttpStatus.BAD_REQUEST.value(),
+            ex.message
+        )
+
+        return ResponseEntity(errorMessage, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(CustomerNotFoundException::class)
+    fun handleCustomerNotFoundException(ex: CustomerNotFoundException): ResponseEntity<ErrorMessage> {
+        logger.error("CustomerNotFoundException observed: ${ex.message}", ex)
+
+        val errorMessage = ErrorMessage(
+            HttpStatus.NOT_FOUND.value(),
+            ex.message
+        )
+
+        return ResponseEntity(errorMessage, HttpStatus.NOT_FOUND)
     }
 }

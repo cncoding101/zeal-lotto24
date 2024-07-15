@@ -102,17 +102,6 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(errorMessage, HttpStatus.BAD_REQUEST)
     }
 
-    @ExceptionHandler
-    fun handleCustomerNotFoundException(ex: CustomerNotFoundException): ResponseEntity<ErrorMessage> {
-        logger.error("CustomerNotFoundException observed: ${ex.message}", ex)
-
-        val errorMessage = ErrorMessage(
-            HttpStatus.NOT_FOUND.value(),
-            ex.message
-        )
-
-        return ResponseEntity(errorMessage, HttpStatus.NOT_FOUND)
-    }
 
     @ExceptionHandler(DuplicateKeyException::class)
     fun handleDuplicateKeyException(ex: DuplicateKeyException): ResponseEntity<ErrorMessage> {
@@ -121,18 +110,6 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
         val errorMessage = ErrorMessage(
             HttpStatus.BAD_REQUEST.value(),
             "Duplicate key: ${ex.message}"
-        )
-
-        return ResponseEntity(errorMessage, HttpStatus.BAD_REQUEST)
-    }
-
-    @ExceptionHandler(CustomerRegistrationException::class)
-    fun handleCustomerRegistrationException(ex: CustomerRegistrationException): ResponseEntity<ErrorMessage> {
-        logger.error("CustomerRegistrationException observed: ${ex.message}", ex)
-
-        val errorMessage = ErrorMessage(
-            HttpStatus.BAD_REQUEST.value(),
-            ex.message
         )
 
         return ResponseEntity(errorMessage, HttpStatus.BAD_REQUEST)
