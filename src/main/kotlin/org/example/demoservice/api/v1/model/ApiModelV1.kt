@@ -23,6 +23,11 @@ data class RegistrationRequest(
     val address: Address? = null,
 )
 
+data class ErrorMessage(
+    var status: Int? = null,
+    var message: String? = null
+)
+
 fun Customer.toApi() = ApiCustomer(
     customerNumber = customerNumber,
     email = email,

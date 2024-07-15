@@ -26,20 +26,20 @@ class CustomerService @Autowired constructor(
         phoneNumber: String?,
         address: Address?
     ): Customer {
+        if (!tenantId.matches(tenantIdRegex)) {
+            throw IllegalArgumentException("Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed.")
+        }
+
+        if (email.isBlank()) {
+            throw IllegalArgumentException("Email must not be blank")
+        }
+
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        if (!email.matches(emailRegex)) {
+            throw IllegalArgumentException("Invalid email format")
+        }
+
         try {
-            if (!tenantId.matches(tenantIdRegex)) {
-                throw IllegalArgumentException("Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed.")
-            }
-
-            if (email.isBlank()) {
-                throw IllegalArgumentException("Email must not be blank")
-            }
-
-            val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
-            if (!email.matches(emailRegex)) {
-                throw IllegalArgumentException("Invalid email format")
-            }
-
             val sequence = sequenceGenerator.generateSequence("customers_sequence");
             val customerNumber = customerNumberProvider.nextCustomerNumber(sequence)
             val customer = Customer(
@@ -51,8 +51,7 @@ class CustomerService @Autowired constructor(
                 phoneNumber = phoneNumber,
                 address = address
             )
-            val test = customerRepository.save(customer)
-            return test
+            return customerRepository.save(customer)
         } catch (ex: DuplicateKeyException) {
             throw CustomerRegistrationException("Failed to register customer due to email not being unique", ex)
         } catch (ex: Exception) {
@@ -66,7 +65,8 @@ class CustomerService @Autowired constructor(
         }
 
         val pageable: Pageable = PageRequest.of(pageNumber, pageSize, Sort.by("customerNumber").ascending())
-        return customerRepository.findAllByTenantId(tenantId, pageable)
+        val test = customerRepository.findAllByTenantId(tenantId, pageable);
+        return test;
     }
 
     @Cacheable(value = ["customers"], key = "#tenantId + '_' + #customerNumber")

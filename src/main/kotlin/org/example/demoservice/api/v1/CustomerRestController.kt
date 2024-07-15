@@ -1,5 +1,6 @@
 package org.example.demoservice.api.v1
 
+import mu.KLogging
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -11,6 +12,8 @@ import org.example.demoservice.api.v1.model.ApiCustomerList
 import org.example.demoservice.api.v1.model.RegistrationRequest
 import org.example.demoservice.api.v1.model.toApi
 import org.example.demoservice.customer.CustomerService
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 
@@ -21,11 +24,13 @@ class CustomerRestController(
     private val customerService: CustomerService,
 ) {
 
+    companion object : KLogging()
+
     @Operation(summary = "register a new customer on a tenant")
     @ApiResponses(
         value = [
             ApiResponse(
-                responseCode = "200", description = "the data of the newly registered customer", content = [
+                responseCode = "201", description = "the data of the newly registered customer", content = [
                     Content(mediaType = "application/json", schema = Schema(implementation = ApiCustomer::class))]
             )
         ]
@@ -34,15 +39,18 @@ class CustomerRestController(
     fun registerCustomer(
         @PathVariable tenantId: String,
         @RequestBody registationRequest: RegistrationRequest
-    ): ApiCustomer {
-        return customerService.registerCustomer(
-            tenantId,
-            registationRequest.email,
-            registationRequest.name,
-            registationRequest.surname,
-            registationRequest.phoneNumber,
-            registationRequest.address
-        ).toApi()
+    ): ResponseEntity<ApiCustomer> {
+        logger.info("Registration of new customer to tenant $tenantId with payload: $registationRequest")
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            customerService.registerCustomer(
+                tenantId,
+                registationRequest.email,
+                registationRequest.name,
+                registationRequest.surname,
+                registationRequest.phoneNumber,
+                registationRequest.address
+            ).toApi()
+        )
     }
 
     @Operation(summary = "get all registered customers of a tenant")
@@ -61,8 +69,10 @@ class CustomerRestController(
         @PathVariable tenantId: String,
         @RequestParam(defaultValue = "0", name = "pageNumber") pageNumber: Int,
         @RequestParam(defaultValue = "10", name = "pageSize") pageSize: Int
-    ): ApiCustomerList {
-        return customerService.getCustomers(tenantId, pageNumber, pageSize).toApi()
+    ): ResponseEntity<ApiCustomerList> {
+        logger.info("Fetching a list of customer for tenant $tenantId")
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(customerService.getCustomers(tenantId, pageNumber, pageSize).toApi())
     }
 
     @Operation(summary = "get a specific customer of a tenant")
@@ -75,7 +85,9 @@ class CustomerRestController(
         ]
     )
     @GetMapping("/{tenantId}/{customerNumber}")
-    fun getCustomer(@PathVariable tenantId: String, @PathVariable customerNumber: String): ApiCustomer {
-        return customerService.getCustomer(tenantId, customerNumber).toApi()
+    fun getCustomer(@PathVariable tenantId: String, @PathVariable customerNumber: String): ResponseEntity<ApiCustomer> {
+        logger.info("Fetching customer with customer id $customerNumber for tenant $tenantId")
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(customerService.getCustomer(tenantId, customerNumber).toApi())
     }
 }

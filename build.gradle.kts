@@ -30,7 +30,18 @@ dependencies {
     testImplementation("org.testcontainers:mongodb")
     testImplementation("org.testcontainers:junit-jupiter")
 
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
+    // unit tests for kotlin
+    testImplementation("io.mockk:mockk:1.10.4")
+    testImplementation("com.ninja-squad:springmockk:3.0.1")
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // enables auto reload for recompiling builds
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+    //logging
+    implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
 }
 
 tasks.withType<KotlinCompile> {
@@ -43,3 +54,12 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+sourceSets {
+    test {
+        java {
+            setSrcDirs(listOf("src/test/kotlin/integration", "src/test/kotlin/unit"))
+        }
+    }
+}
+

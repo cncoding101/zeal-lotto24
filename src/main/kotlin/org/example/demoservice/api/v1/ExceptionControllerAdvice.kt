@@ -1,9 +1,9 @@
 package org.example.demoservice.api.v1
 
+import org.example.demoservice.api.v1.model.ErrorMessage
 import org.springframework.dao.DuplicateKeyException
 import org.example.demoservice.customer.CustomerNotFoundException
 import org.example.demoservice.customer.CustomerRegistrationException
-import org.example.demoservice.error.ErrorMessage
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -44,7 +44,6 @@ class ExceptionControllerAdvice {
 
     @ExceptionHandler
     fun handleIllegalStateException(ex: IllegalStateException): ResponseEntity<ErrorMessage> {
-
         val errorMessage = ErrorMessage(
             HttpStatus.NOT_FOUND.value(),
             ex.message
