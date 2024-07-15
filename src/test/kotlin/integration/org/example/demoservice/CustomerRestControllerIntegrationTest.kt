@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.mongodb.core.MongoOperations
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -23,6 +24,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
     classes = [MongoDBTestContainerConfig::class]
 )
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @AutoConfigureWebTestClient
 class CustomerRestControllerIntegrationTest {
 
@@ -42,7 +44,7 @@ class CustomerRestControllerIntegrationTest {
     }
 
     @Test
-    fun registerAndFindCustomer() {
+    fun registerCustomer_getCustomer() {
         val customer = webTestClient.post()
             .uri("/api/v1/customers/{tenantId}", "test-tenant")
             .bodyValue(RegistrationRequest("email@example.com"))
@@ -65,7 +67,7 @@ class CustomerRestControllerIntegrationTest {
     }
 
     @Test
-    fun getCustomerListForTenant() {
+    fun getCustomers_listForTenant() {
         val customer1 = webTestClient.post()
             .uri("/api/v1/customers/{tenantId}", "test-tenant")
             .bodyValue(RegistrationRequest("email1@example.com"))
@@ -105,7 +107,7 @@ class CustomerRestControllerIntegrationTest {
     }
 
     @Test
-    fun getCustomerListForNonExistentTenant() {
+    fun getCustomers_listForNonExistentTenant() {
         val payload = webTestClient.get()
             .uri { uriBuilder ->
                 uriBuilder.path("/api/v1/customers/{tenantId}")
@@ -123,7 +125,7 @@ class CustomerRestControllerIntegrationTest {
     }
 
     @Test
-    fun fetchCustomerWithNonExistentTenantId() {
+    fun getCustomer_withNonExistentTenantId() {
         val customer = webTestClient.post()
             .uri("/api/v1/customers/{tenantId}", "test-tenant")
             .bodyValue(RegistrationRequest("email@example.com"))
@@ -146,7 +148,7 @@ class CustomerRestControllerIntegrationTest {
     }
 
     @Test
-    fun registerCustomerWithInvalidEmailFormat() {
+    fun registerCustomer_withInvalidEmailFormat() {
         val error = webTestClient.post()
             .uri("/api/v1/customers/{tenantId}", "test-tenant")
             .bodyValue(RegistrationRequest("invalid-email"))
@@ -160,7 +162,7 @@ class CustomerRestControllerIntegrationTest {
     }
 
     @Test
-    fun registerCustomerWithBlankEmail() {
+    fun registerCustomer_withBlankEmail() {
         val error = webTestClient.post()
             .uri("/api/v1/customers/{tenantId}", "test-tenant")
             .bodyValue(RegistrationRequest(""))
@@ -174,7 +176,7 @@ class CustomerRestControllerIntegrationTest {
     }
 
     @Test
-    fun fetchCustomerWithSpecialCharactersInTenantId() {
+    fun getCustomer_withSpecialCharactersInTenantId() {
         val specialCharTenantId = "tenant!@#$"
 
         val error = webTestClient.get()
@@ -189,12 +191,7 @@ class CustomerRestControllerIntegrationTest {
     }
 
     @Test
-    fun registerCustomerWithExistingEmail() {
-//        customerRestController.registerCustomer(
-//            "test-tenant",
-//            RegistrationRequest("unique@example.com")
-//        )
-
+    fun registerCustomer_withExistingEmail() {
        webTestClient.post()
             .uri("/api/v1/customers/{tenantId}", "test-tenant")
             .bodyValue(RegistrationRequest("unique@example.com"))
@@ -210,9 +207,6 @@ class CustomerRestControllerIntegrationTest {
             .returnResult()
             .responseBody!!
 
-//        val exception = assertThrows<Exception> {
-//            customerRestController.registerCustomer("test-tenant", RegistrationRequest("unique@example.com"))
-//        }
         Assertions.assertTrue(error.message!!.contains("Failed to register customer due to email not being unique"))
     }
 }

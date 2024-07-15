@@ -1,5 +1,6 @@
 package org.example.demoservice.api.v1.model
 
+import jakarta.validation.constraints.NotBlank
 import org.example.demoservice.customer.Address
 import org.example.demoservice.customer.Customer
 import org.springframework.data.domain.Page
@@ -16,6 +17,7 @@ data class ApiCustomer(
 )
 
 data class RegistrationRequest(
+    @get:NotBlank(message = "Email must not be blank")
     val email: String,
     val name: String? = null,
     val surname: String? = null,

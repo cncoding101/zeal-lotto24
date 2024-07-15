@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.example.demoservice.api.v1.model.ApiCustomer
 import org.example.demoservice.api.v1.model.ApiCustomerList
 import org.example.demoservice.api.v1.model.RegistrationRequest
@@ -14,12 +15,14 @@ import org.example.demoservice.api.v1.model.toApi
 import org.example.demoservice.customer.CustomerService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 
 @RestController
 @RequestMapping("/api/v1/customers")
 @Tag(name = "Customer API")
+@Validated
 class CustomerRestController(
     private val customerService: CustomerService,
 ) {
@@ -38,7 +41,7 @@ class CustomerRestController(
     @PostMapping("/{tenantId}")
     fun registerCustomer(
         @PathVariable tenantId: String,
-        @RequestBody registationRequest: RegistrationRequest
+        @RequestBody @Valid registationRequest: RegistrationRequest
     ): ResponseEntity<ApiCustomer> {
         logger.info("Registration of new customer to tenant $tenantId with payload: $registationRequest")
         return ResponseEntity.status(HttpStatus.CREATED).body(

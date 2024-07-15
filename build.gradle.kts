@@ -42,6 +42,9 @@ dependencies {
 
     //logging
     implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
+
+    //validation
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 
 tasks.withType<KotlinCompile> {

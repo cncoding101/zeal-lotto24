@@ -30,10 +30,6 @@ class CustomerService @Autowired constructor(
             throw IllegalArgumentException("Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed.")
         }
 
-        if (email.isBlank()) {
-            throw IllegalArgumentException("Email must not be blank")
-        }
-
         val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
         if (!email.matches(emailRegex)) {
             throw IllegalArgumentException("Invalid email format")
