@@ -4,4 +4,4 @@ package org.example.demoservice.customer
 class CustomerNotFoundException(
     tenantId: String,
     customerNumber: String,
-) : RuntimeException("customer $customerNumber not found in tenant $tenantId")
+) : RuntimeException("Customer $customerNumber not found in tenant $tenantId")

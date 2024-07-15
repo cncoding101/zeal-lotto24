@@ -7,3 +7,8 @@ spring:
     database: demo
     username: demo_application
     password: demo_password
+    auto-index-creation: true
+
+logging:
+  level:
+    org.springframework.cache: TRACE

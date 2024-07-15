@@ -11,12 +11,8 @@ import org.example.demoservice.api.v1.model.ApiCustomerList
 import org.example.demoservice.api.v1.model.RegistrationRequest
 import org.example.demoservice.api.v1.model.toApi
 import org.example.demoservice.customer.CustomerService
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+
 
 @RestController
 @RequestMapping("/api/v1/customers")
@@ -35,22 +31,38 @@ class CustomerRestController(
         ]
     )
     @PostMapping("/{tenantId}")
-    fun registerCustomer(@PathVariable tenantId: String, @RequestBody registationRequest: RegistrationRequest): ApiCustomer {
-        return customerService.registerCustomer(tenantId, registationRequest.email).toApi()
+    fun registerCustomer(
+        @PathVariable tenantId: String,
+        @RequestBody registationRequest: RegistrationRequest
+    ): ApiCustomer {
+        return customerService.registerCustomer(
+            tenantId,
+            registationRequest.email,
+            registationRequest.name,
+            registationRequest.surname,
+            registationRequest.phoneNumber,
+            registationRequest.address
+        ).toApi()
     }
 
     @Operation(summary = "get all registered customers of a tenant")
     @ApiResponses(
         value = [
             ApiResponse(
-                responseCode = "200", description = "A list of all registered customers of the specified tenant", content = [
+                responseCode = "200",
+                description = "A list of all registered customers of the specified tenant",
+                content = [
                     Content(mediaType = "application/json", schema = Schema(implementation = ApiCustomerList::class))]
             )
         ]
     )
     @GetMapping("/{tenantId}")
-    fun getCustomers(@PathVariable tenantId: String): ApiCustomerList {
-        return customerService.getCustomers(tenantId).toApi()
+    fun getCustomers(
+        @PathVariable tenantId: String,
+        @RequestParam(defaultValue = "0", name = "pageNumber") pageNumber: Int,
+        @RequestParam(defaultValue = "10", name = "pageSize") pageSize: Int
+    ): ApiCustomerList {
+        return customerService.getCustomers(tenantId, pageNumber, pageSize).toApi()
     }
 
     @Operation(summary = "get a specific customer of a tenant")
