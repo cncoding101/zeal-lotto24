@@ -18,11 +18,6 @@ class CustomerService @Autowired constructor(
     private val customerEventsProducer: CustomerEventsProducer
 ) {
 
-
-    companion object {
-        val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")
-    }
-
     fun registerCustomer(
         tenantId: String,
         email: String,
@@ -31,10 +26,6 @@ class CustomerService @Autowired constructor(
         phoneNumber: String?,
         address: Address?
     ): Customer {
-        if (!email.matches(EMAIL_REGEX)) {
-            throw IllegalArgumentException("Invalid email format")
-        }
-
         try {
             val sequence = sequenceGenerator.generateSequence("customers_sequence")
             val customerNumber = customerNumberProvider.nextCustomerNumber(sequence)

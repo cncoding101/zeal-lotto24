@@ -1,11 +1,16 @@
 package org.example.demoservice
 
+import org.apache.kafka.clients.consumer.Consumer
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.ConsumerRecords
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.bson.Document
 import org.example.demoservice.api.v1.model.ApiCustomer
 import org.example.demoservice.api.v1.model.ApiCustomerList
 import org.example.demoservice.api.v1.model.ErrorMessage
 import org.example.demoservice.api.v1.model.RegistrationRequest
 import org.example.demoservice.testconfig.MongoDBTestContainerConfig
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -14,8 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.mongodb.core.MongoOperations
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory
+import org.springframework.kafka.test.EmbeddedKafkaBroker
+import org.springframework.kafka.test.context.EmbeddedKafka
+import org.springframework.kafka.test.utils.KafkaTestUtils
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.junit.jupiter.Testcontainers
 
@@ -26,21 +36,47 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
+@EmbeddedKafka(topics = ["customer-events"])
+@TestPropertySource(
+    properties = [
+        "spring.kafka.producer.bootstrap-servers=\${spring.embedded.kafka.brokers}",
+        "spring.kafka.admin.properties.bootstrap.servers=\${spring.embedded.kafka.brokers}"
+    ]
+)
 class CustomerRestControllerIntegrationTest {
 
     private val logger = LoggerFactory.getLogger(CustomerRestControllerIntegrationTest::class.java)
 
     @Autowired
-    private lateinit var mongoOperations: MongoOperations
+    private lateinit var webTestClient: WebTestClient
 
     @Autowired
-    lateinit var webTestClient: WebTestClient
+    private lateinit var embeddedKafkaBroker: EmbeddedKafkaBroker
+
+    @Autowired
+    private lateinit var mongoOperations: MongoOperations
+
+    private lateinit var consumer: Consumer<String, String>
 
     @BeforeEach
     fun setUp() {
+        // create a consumer group to be used for testing
+        val configs = HashMap(KafkaTestUtils.consumerProps("group", "true", embeddedKafkaBroker))
+//        configs[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "latest"
+        configs[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        configs[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+
+        consumer = DefaultKafkaConsumerFactory<String, String>(configs).createConsumer()
+        embeddedKafkaBroker.consumeFromAllEmbeddedTopics(consumer)
+
         mongoOperations.collectionNames.forEach {
             mongoOperations.getCollection(it).deleteMany(Document())
         }
+    }
+
+    @AfterEach
+    fun tearDown() {
+        consumer.close()
     }
 
     @Test
@@ -64,6 +100,9 @@ class CustomerRestControllerIntegrationTest {
 
         Assertions.assertEquals(customer, foundCustomer)
         Assertions.assertEquals("email@example.com", foundCustomer.email)
+
+//        val consumerRecords: ConsumerRecords<String, String> = KafkaTestUtils.getRecords(consumer)
+//        Assertions.assertEquals(consumerRecords.count(), 1)
     }
 
     @Test

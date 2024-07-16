@@ -1,6 +1,6 @@
 package org.example.demoservice.api.v1.model
 
-//import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import org.example.demoservice.customer.Address
 import org.example.demoservice.customer.Customer
@@ -19,7 +19,7 @@ data class ApiCustomer(
 
 data class RegistrationRequest(
     @get:NotBlank(message = "Email must not be blank")
-//    @Email(message = "Invalid email format", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+    @get:Email(message = "Invalid email format", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     val email: String,
     val name: String? = null,
     val surname: String? = null,

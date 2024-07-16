@@ -23,6 +23,8 @@ class CustomerEventsProducer(
         val key = customerEvent.customerEventId
         val value = objectMapper.writeValueAsString(customerEvent)
 
+        // 1. blocking call to get metadata from cluster (happens only once)
+        // 2. sends message and returns completableFuture
         val completableFuture = kafkaTemplate.send(topic, key, value)
         return completableFuture
             .whenComplete { sendResult, throwable ->
