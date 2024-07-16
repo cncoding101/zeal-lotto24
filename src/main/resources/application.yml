@@ -9,6 +9,22 @@ spring:
     password: demo_password
     auto-index-creation: true
 
+  kafka:
+    topic: customer-events
+    template:
+      default-topic: customer-events
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        acks: all
+        retries: 10
+        retry.backoff.ms: 1000
+    admin:
+      properties:
+        bootstrap.servers: localhost:9092
+
 logging:
   level:
     org.springframework.cache: TRACE

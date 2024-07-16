@@ -1,0 +1,11 @@
+{
+  "customerEventId": null,
+  "customerEventType": "NEW",
+  "customer": {
+    "email": "",
+    "name": "",
+    "surname": "",
+    "phoneNumber": "",
+    "address": ""
+  }
+}

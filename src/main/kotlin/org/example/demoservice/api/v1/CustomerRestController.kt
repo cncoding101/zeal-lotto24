@@ -1,6 +1,5 @@
 package org.example.demoservice.api.v1
 
-import mu.KLogging
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -8,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Pattern
+import mu.KLogging
 import org.example.demoservice.api.v1.model.*
 import org.example.demoservice.customer.CustomerNotFoundException
 import org.example.demoservice.customer.CustomerRegistrationException
@@ -41,7 +42,10 @@ class CustomerRestController(
     )
     @PostMapping("/{tenantId}")
     fun registerCustomer(
-        @PathVariable tenantId: String,
+        @PathVariable @Pattern(
+            regexp = "^[a-zA-Z0-9_-]+$",
+            message = "Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed."
+        ) @Valid tenantId: String,
         @RequestBody @Valid registationRequest: RegistrationRequest
     ): ResponseEntity<ApiCustomer> {
         logger.info("Registration of new customer to tenant $tenantId with payload: $registationRequest")
@@ -70,7 +74,10 @@ class CustomerRestController(
     )
     @GetMapping("/{tenantId}")
     fun getCustomers(
-        @PathVariable tenantId: String,
+        @PathVariable @Pattern(
+            regexp = "^[a-zA-Z0-9_-]+$",
+            message = "Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed."
+        ) @Valid tenantId: String,
         @PageableDefault(page = 0, size = 10) pageable: Pageable
     ): ResponseEntity<ApiCustomerList> {
         logger.info("Fetching a list of customer for tenant $tenantId")
@@ -88,7 +95,12 @@ class CustomerRestController(
         ]
     )
     @GetMapping("/{tenantId}/{customerNumber}")
-    fun getCustomer(@PathVariable tenantId: String, @PathVariable customerNumber: String): ResponseEntity<ApiCustomer> {
+    fun getCustomer(
+        @PathVariable @Pattern(
+            regexp = "^[a-zA-Z0-9_-]+$",
+            message = "Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed."
+        ) @Valid tenantId: String, @PathVariable customerNumber: String
+    ): ResponseEntity<ApiCustomer> {
         logger.info("Fetching customer with customer id $customerNumber for tenant $tenantId")
         return ResponseEntity.status(HttpStatus.OK)
             .body(customerService.getCustomer(tenantId, customerNumber).toApi())

@@ -1,10 +1,9 @@
 package org.example.demoservice.api.v1.handler
 
+import jakarta.validation.ConstraintViolationException
 import mu.KLogging
 import org.example.demoservice.api.v1.model.ErrorMessage
 import org.springframework.dao.DuplicateKeyException
-import org.example.demoservice.customer.CustomerNotFoundException
-import org.example.demoservice.customer.CustomerRegistrationException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
@@ -15,7 +14,6 @@ import org.springframework.web.HttpMediaTypeNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
@@ -89,9 +87,27 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(errorMessage, HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleConstraintViolationException(
+        ex: ConstraintViolationException,
+        request: WebRequest
+    ): ResponseEntity<ErrorMessage> {
+        logger.error("ConstraintViolationException observed: ${ex.message}", ex)
+
+        val errorMessage = ErrorMessage(
+            HttpStatus.BAD_REQUEST.value(),
+            ex.message ?: "Bad request"
+        )
+
+        return ResponseEntity(errorMessage, HttpStatus.BAD_REQUEST)
+    }
+
 
     @ExceptionHandler(IllegalArgumentException::class)
-    fun handleIllegalArgumentException(ex: IllegalArgumentException, request: WebRequest): ResponseEntity<Any> {
+    fun handleIllegalArgumentException(
+        ex: IllegalArgumentException,
+        request: WebRequest
+    ): ResponseEntity<ErrorMessage> {
         logger.error("IllegalArgumentException observed: ${ex.message}", ex)
 
         val errorMessage = ErrorMessage(

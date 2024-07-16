@@ -25,7 +25,7 @@ data class Customer(
     val address: Address? = null,
 ) {
     companion object {
-//        prevents persistent data
+        //        prevents persistent data
         @Transient
         const val SEQUENCE_NAME: String = "customers_sequence"
     }

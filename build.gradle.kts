@@ -45,6 +45,12 @@ dependencies {
 
     //validation
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    //provides its own implementation for standard validation
+    implementation("org.hibernate.validator:hibernate-validator")
+
+    //kafka
+    implementation("org.springframework.kafka:spring-kafka")
+    testImplementation("org.springframework.kafka:spring-kafka-test")
 }
 
 tasks.withType<KotlinCompile> {

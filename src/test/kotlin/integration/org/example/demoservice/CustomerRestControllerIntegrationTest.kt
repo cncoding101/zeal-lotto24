@@ -192,7 +192,7 @@ class CustomerRestControllerIntegrationTest {
 
     @Test
     fun registerCustomer_withExistingEmail() {
-       webTestClient.post()
+        webTestClient.post()
             .uri("/api/v1/customers/{tenantId}", "test-tenant")
             .bodyValue(RegistrationRequest("unique@example.com"))
             .exchange()
