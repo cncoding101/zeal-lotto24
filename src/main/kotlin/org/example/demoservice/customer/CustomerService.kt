@@ -28,7 +28,7 @@ class CustomerService @Autowired constructor(
     ): Customer {
         try {
             val sequence = sequenceGenerator.generateSequence("customers_sequence")
-            val customerNumber = customerNumberProvider.nextCustomerNumber(sequence)
+            val customerNumber = customerNumberProvider.formatCustomerNumber(sequence)
             val customer = Customer(
                 tenantId = tenantId,
                 customerNumber = customerNumber,
