@@ -78,7 +78,7 @@ class CustomerRestController(
             regexp = "^[a-zA-Z0-9_-]+$",
             message = "Invalid tenant ID format. Only alphanumeric characters, underscore, and hyphen are allowed."
         ) @Valid tenantId: String,
-        @PageableDefault(page = 0, size = 10) pageable: Pageable
+        @PageableDefault(page = 0, size = 10, sort = ["customerNumber"]) pageable: Pageable
     ): ResponseEntity<ApiCustomerList> {
         logger.info("Fetching a list of customer for tenant $tenantId")
         return ResponseEntity.status(HttpStatus.OK)

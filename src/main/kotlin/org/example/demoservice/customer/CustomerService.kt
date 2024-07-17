@@ -27,6 +27,7 @@ class CustomerService @Autowired constructor(
         address: Address?
     ): Customer {
         try {
+            // can be incorrect, e.g. not matching the records in the database
             val sequence = sequenceGenerator.generateSequence("customers_sequence")
             val customerNumber = customerNumberProvider.formatCustomerNumber(sequence)
             val customer = Customer(
@@ -57,8 +58,7 @@ class CustomerService @Autowired constructor(
     }
 
     fun getCustomers(tenantId: String, pageable: Pageable): Page<Customer> {
-        val test = customerRepository.findAllByTenantId(tenantId, pageable)
-        return test
+        return customerRepository.findAllByTenantId(tenantId, pageable)
     }
 
     @Cacheable(value = ["customers"], key = "#tenantId + '_' + #customerNumber")
