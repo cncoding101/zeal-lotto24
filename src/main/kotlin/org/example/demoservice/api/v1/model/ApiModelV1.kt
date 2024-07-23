@@ -7,9 +7,7 @@ import org.example.demoservice.customer.Customer
 import org.springframework.data.domain.Page
 
 data class ApiCustomerList(
-    val customers: List<ApiCustomer>,
-    val pageNumber: Int,
-    val pageSize: Int
+    val customers: List<ApiCustomer>
 )
 
 data class ApiCustomer(
@@ -43,7 +41,5 @@ fun Page<Customer>.toApi() = ApiCustomerList(
             customerNumber = it.customerNumber,
             email = it.email,
         )
-    },
-    pageNumber = this.pageable.pageNumber,
-    pageSize = this.pageable.pageSize
+    }
 )

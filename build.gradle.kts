@@ -40,13 +40,8 @@ dependencies {
     // enables auto reload for recompiling builds
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    //logging
-    implementation("io.github.microutils:kotlin-logging-jvm:2.0.11")
-
     //validation
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    //provides its own implementation for standard validation
-    implementation("org.hibernate.validator:hibernate-validator")
 
     //kafka
     implementation("org.springframework.kafka:spring-kafka")
